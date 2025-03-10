@@ -10,11 +10,7 @@ model = "model_1.0"
 robot = "pendubot"
 
 model_par_path = (
-    "../../../data/system_identification/identified_parameters/"
-    + design
-    + "/"
-    + model
-    + "/model_parameters.yml"
+    "../../../data/system_identification/identified_parameters/" + design + "/" + model + "/model_parameters.yml"
 )
 mpar = model_parameters(filepath=model_par_path)
 mpar.set_torque_limit([6.0, 0.0])
