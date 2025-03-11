@@ -12,9 +12,7 @@ leaderboard_config = {
     "username": "rnilva",
 }
 
-model_path = Path(
-    "../../../data/policies/design_C.1/model_1.1/pendubot/AR_EAPO/model.zip"
-)
+model_path = Path("../../../data/policies/design_C.1/model_1.1/pendubot/AR_EAPO/model.zip")
 controller = AR_EAPOController(
     model_path=model_path,
     robot="pendubot",

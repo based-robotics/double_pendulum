@@ -14,6 +14,6 @@ leaderboard_config = {
 }
 
 controller = HistorySACController(
-    "acrobot", model_path="../../../data/policies/design_C.1/model_1.1/acrobot/history_sac/final_a_b"
+    "acrobot", model_path="../../../data/policies/design_C.1/model_1.0/acrobot/history_sac/final_a_b"
 )
 controller.init()

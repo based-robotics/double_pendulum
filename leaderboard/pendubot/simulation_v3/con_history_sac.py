@@ -12,7 +12,7 @@ leaderboard_config = {
     "readme_path": f"readmes/{name}.md",
     "username": "tfaust",
 }
-
+# NOTE: no configuration for pendulum, using another model parameters
 controller = HistorySACController(
     "pendubot", model_path="../../../data/policies/design_C.1/model_1.1/pendubot/history_sac/final_p_b_swing"
 )
