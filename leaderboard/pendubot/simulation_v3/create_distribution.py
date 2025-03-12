@@ -201,7 +201,7 @@ parser.add_argument(
 
 gen_data = parser.parse_args().gen_data
 data_dir = parser.parse_args().data_dir
-num_iters = parser.parse_args().num_iters
+num_iters = int(parser.parse_args().num_iters)
 stats = {}
 
 if gen_data:
@@ -307,11 +307,11 @@ plt.savefig("sorted_controllers_comparison.png", dpi=300)
 plt.show()
 
 
-np.savetxt(
-    "batch_results.csv",
-    leaderboard_sorted,
-    header=header,
-    delimiter=",",
-    fmt="%s",
-    comments="",
-)
+# np.savetxt(
+#     "batch_results.csv",
+#     leaderboard_sorted,
+#     header=header,
+#     delimiter=",",
+#     fmt="%s",
+#     comments="",
+# )

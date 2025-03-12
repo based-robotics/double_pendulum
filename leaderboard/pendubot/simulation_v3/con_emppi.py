@@ -59,13 +59,13 @@ torque_limit = [6.0, 0.0]
 # goal = [np.pi, 0.0, 0.0, 0.0]
 
 # setup savedir
-timestamp = datetime.today().strftime("%Y%m%d-%H%M%S")
-save_dir = os.path.join("data", design, model, robot, "mppi", timestamp)
-os.makedirs(save_dir)
+# timestamp = datetime.today().strftime("%Y%m%d-%H%M%S")
+# save_dir = os.path.join("data", design, model, robot, "mppi", timestamp)
+# os.makedirs(save_dir)
 
 cfg = Config(
     key=jax.random.PRNGKey(0),
-    horizon=75,
+    horizon=20,
     samples=4096,
     exploration=0,
     lambda_=50.0,
@@ -75,22 +75,22 @@ cfg = Config(
     dx_delta_max=1e-1,
     dt_delta_max=0.02,
     # Baseline control parameters
-    baseline_control_type="ar_eapo",
+    baseline_control_type="zero",
     model_path="../../../data/policies/design_C.1/model_1.1/pendubot/AR_EAPO/model.zip",
     robot="pendubot",
     lqr_dt=0.005,
-    sigma=jnp.diag(jnp.array([0.01, 0.01])),
+    sigma=jnp.diag(jnp.array([0.2, 0.2])),
     state_dim=4,
     act_dim=2,
     act_min=-jnp.array(torque_limit),
     act_max=jnp.array(torque_limit),
     Qdiag=jnp.array([10.0, 1.0, 0.1, 0.1]),
     Rdiag=jnp.array([0.1, 0.1]),
-    Pdiag=jnp.array([10.0, 10.0, 0.1, 0.1]),
-    terminal_coeff=1e0,
+    Pdiag=jnp.array([5.0, 5.0, 2.0, 2.0]),
+    terminal_coeff=1e6,
     mppi_dt=0.02,
     mpar=mpar,
-    mppi_integrator="variational",
+    mppi_integrator="explicit",
 )
 
 controller = MPPIController(config=cfg)
