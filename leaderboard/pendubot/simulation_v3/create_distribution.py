@@ -1,6 +1,7 @@
 import argparse
 import importlib
 import os
+from copy import deepcopy
 from importlib import reload
 
 import matplotlib.pyplot as plt
@@ -142,17 +143,6 @@ def leaderboard_scores(
                 plot_link = "[plot](" + controller_link + "/timeseries.png)"
                 video_link = "[video](" + controller_link + "/sim_video.gif)"
                 append_data.append(data_link + " " + plot_link + " " + video_link)
-        else:
-            append_data.append(str(round(best_score, 3)))
-            append_data.append(str(round(score, 3)))
-            append_data.append(d["username"])
-            if link_base != "":
-                controller_link = link_base + d["name"]
-                data_link = "[data](" + controller_link + "/experiment" + str(best + 1).zfill(2) + "/trajectory.csv)"
-                plot_link = "[plot](" + controller_link + "/experiment" + str(best + 1).zfill(2) + "/timeseries.png)"
-                video_link = "[video](" + controller_link + "/experiment" + str(best + 1).zfill(2) + "/video.gif)"
-                append_data.append(data_link + " " + plot_link + " " + video_link)
-
         leaderboard_data.append(append_data)
 
     header = "Controller,"
@@ -260,7 +250,7 @@ for f in os.listdir(src_dir):
                 pathes.append(os.path.join(data_dir, controller, f_con))
             conf = mod.leaderboard_config
             conf["csv_path"] = pathes
-            leaderboard_configs[mod.leaderboard_config["name"]] = conf
+            leaderboard_configs[mod.leaderboard_config["simple_name"]] = conf
 
 # for controller_name, leaderboard_data in leaderboard_configs.items():
 header, leaderboard = leaderboard_scores(
@@ -271,7 +261,7 @@ header, leaderboard = leaderboard_scores(
     score_version="v3",
 )
 # Sort the leaderboard entries by the median uptime (ascending order)
-leaderboard_sorted = sorted(leaderboard, key=lambda r: np.median(r[3]), reverse=True)
+leaderboard_sorted = sorted(leaderboard, key=lambda r: np.mean(r[3]), reverse=True)
 
 # Extract sorted controller names
 controllers = [entry[0] for entry in leaderboard_sorted]
@@ -299,6 +289,8 @@ ax1.set_ylabel("Uptime [s]")
 ax1.grid(True, axis="y", linestyle="--", alpha=0.7)
 
 # Set x-axis tick labels using sorted controller names
+ax1.set_yticks(np.arange(0, 60, 15))
+ax2.set_yticks(np.arange(0, 40, 10))
 plt.xticks(x_pos, controllers, rotation=45, ha="right")
 plt.tight_layout()
 
@@ -306,12 +298,34 @@ plt.tight_layout()
 plt.savefig("sorted_controllers_comparison.png", dpi=300)
 plt.show()
 
+# Write a median and variance as columns
+leaderboard_final = [
+    [
+        res[0],
+        swingups_mean[i],
+        swingups_std[i],
+        uptime_mean[i],
+        uptime_std[i],
+    ]
+    for i, res in enumerate(leaderboard_sorted)
+]
+header_final = ["Controller", "swingups mean", "swingups std", "uptime mean", "uptime std"]
+header_final_str = ",".join(header_final)
+np.savetxt(
+    "batch_results.csv",
+    leaderboard_final,
+    header=header_final_str,
+    delimiter=",",
+    fmt="%s",
+    comments="",
+)
 
-# np.savetxt(
-#     "batch_results.csv",
-#     leaderboard_sorted,
-#     header=header,
-#     delimiter=",",
-#     fmt="%s",
-#     comments="",
-# )
+df = pd.DataFrame(leaderboard_final, columns=header_final)
+# Save the mean +- std as a single string column with latex format
+df["Swingups"] = "$" + df["swingups mean"].round(2).astype(str) + r" \pm " + df["swingups std"].astype(str) + "$"
+df["Uptime, [t]"] = "$" + df["uptime mean"].round(2).astype(str) + r" \pm " + df["swingups std"].astype(str) + "$"
+print(
+    df.sort_values(by=["uptime mean"], ascending=False)
+    .drop(["swingups mean", "swingups std", "uptime mean", "uptime std"], axis=1)
+    .to_latex(index=False)
+)
