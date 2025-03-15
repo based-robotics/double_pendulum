@@ -27,7 +27,7 @@ name = "vimmpi"
 leaderboard_config = {
     "csv_path": name + "/sim_swingup.csv",
     "name": name,
-    "simple_name": "EMPPI",
+    "simple_name": "IFMPPI-AR-EAPO",
     "short_description": "Stabilization of iLQR trajectory with time-varying LQR.",
     "readme_path": f"readmes/{name}.md",
     "username": "adk",
@@ -75,7 +75,7 @@ cfg = Config(
     dx_delta_max=1e-1,
     dt_delta_max=0.02,
     # Baseline control parameters
-    baseline_control_type="zero",
+    baseline_control_type="ar_eapo",
     model_path="../../../data/policies/design_C.1/model_1.1/pendubot/AR_EAPO/model.zip",
     robot="pendubot",
     lqr_dt=0.005,
@@ -90,7 +90,7 @@ cfg = Config(
     terminal_coeff=1e6,
     mppi_dt=0.02,
     mpar=mpar,
-    mppi_integrator="explicit",
+    mppi_integrator="implicitfast",
 )
 
 controller = MPPIController(config=cfg)

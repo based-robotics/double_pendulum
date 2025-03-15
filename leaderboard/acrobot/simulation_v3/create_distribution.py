@@ -292,7 +292,7 @@ ax1.grid(True, axis="y", linestyle="--", alpha=0.7)
 # Set x-axis tick labels using sorted controller names
 ax1.set_yticks(np.arange(0, 61, 15))
 ax2.set_yticks(np.arange(0, 41, 10))
-plt.xticks(x_pos, controllers, rotation=45, ha="right", fontsize=5)
+plt.xticks(x_pos, controllers, rotation=45, ha="right", fontsize=8)
 plt.tight_layout()
 
 # Save the plot with high DPI

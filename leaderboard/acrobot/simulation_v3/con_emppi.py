@@ -38,7 +38,7 @@ leaderboard_config = {
 # design = "design_A.0"
 # model = "model_1.0"
 # robot = "double_pendulum"
-torque_limit = [6.0, 0.0]
+torque_limit = [0.0, 6.0]
 
 # model_par_path = (
 #     "../third_party/double_pendulum/data/system_identification/identified_parameters/"
@@ -76,8 +76,8 @@ cfg = Config(
     dt_delta_max=0.02,
     # Baseline control parameters
     baseline_control_type="zero",
-    model_path="../../../data/policies/design_C.1/model_1.1/pendubot/AR_EAPO/model.zip",
-    robot="pendubot",
+    model_path="../../../data/policies/design_C.1/model_1.1/acrobot/AR_EAPO/model.zip",
+    robot="acrobot",
     lqr_dt=0.005,
     sigma=jnp.diag(jnp.array([0.2, 0.2])),
     state_dim=4,
