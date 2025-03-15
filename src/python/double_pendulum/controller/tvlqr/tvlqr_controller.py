@@ -123,9 +123,13 @@ class TVLQRController(AbstractController):
         self.dt = self.T[1] - self.T[0]
 
         # interpolate trajectory
-        self.X_interp = InterpolateVector(T=self.T, X=self.X, num_break=num_break, poly_degree=3)
+        self.X_interp = InterpolateVector(
+            T=self.T, X=self.X, num_break=num_break, poly_degree=3
+        )
 
-        self.U_interp = InterpolateVector(T=self.T, X=self.U, num_break=num_break, poly_degree=3)
+        self.U_interp = InterpolateVector(
+            T=self.T, X=self.U, num_break=num_break, poly_degree=3
+        )
 
         # default parameters
         self.Q = np.diag([4.0, 4.0, 0.1, 0.1])
@@ -137,7 +141,12 @@ class TVLQRController(AbstractController):
         self.K = []
         # self.k = []
 
-    def set_cost_parameters(self, Q=np.diag([4.0, 4.0, 0.1, 0.1]), R=2 * np.eye(1), Qf=np.diag([4.0, 4.0, 0.1, 0.1])):
+    def set_cost_parameters(
+        self,
+        Q=np.diag([4.0, 4.0, 0.1, 0.1]),
+        R=2 * np.eye(1),
+        Qf=np.diag([4.0, 4.0, 0.1, 0.1]),
+    ):
         """set_cost_parameters
         Set the cost matrices Q, R and Qf.
         (Qf for the final stabilization)
@@ -184,9 +193,13 @@ class TVLQRController(AbstractController):
         Initalize the controller.
         """
 
-        self.K, _ = iterative_riccati(self.splant, self.Q, self.R, self.Qf, self.dt, self.X, self.U)
+        self.K, _ = iterative_riccati(
+            self.splant, self.Q, self.R, self.Qf, self.dt, self.X, self.U
+        )
 
-        self.K_interp = InterpolateMatrix(T=self.T, X=self.K, num_break=self.num_break, poly_degree=3)
+        self.K_interp = InterpolateMatrix(
+            T=self.T, X=self.K, num_break=self.num_break, poly_degree=3
+        )
 
     def get_control_output_(self, x, t):
         """
@@ -287,4 +300,9 @@ class TVLQRController(AbstractController):
         np.savetxt(os.path.join(save_dir, "controller_tvlqr_Rmatrix.txt"), self.R)
         np.savetxt(os.path.join(save_dir, "controller_tvlqr_Qfmatrix.txt"), self.Qf)
 
-        save_trajectory(os.path.join(save_dir, "controller_tvlqr_initial_traj.csv"), self.T, self.X, self.U)
+        save_trajectory(
+            os.path.join(save_dir, "controller_tvlqr_initial_traj.csv"),
+            self.T,
+            self.X,
+            self.U,
+        )

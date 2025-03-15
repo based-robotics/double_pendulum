@@ -1,27 +1,13 @@
-import os
-from datetime import datetime
-
 import jax
 import jax.numpy as jnp
-import numpy as np
 
-# from double_pendulum.model.model_parameters import model_parameters
-from double_pendulum.model.symbolic_plant import SymbolicDoublePendulum
-from double_pendulum.simulation.simulation import Simulator
 from sim_parameters import (
-    design,
-    dt,
     goal,
-    integrator,
-    model,
     mpar,
-    robot,
-    t_final,
-    x0,
 )
 
-from pendulomovich.config import Config
-from pendulomovich.controller import MPPIController
+from double_pendulum.controller.vimppi.config import Config
+from double_pendulum.controller.vimppi.controller import MPPIController
 
 name = "vimmpi"
 leaderboard_config = {
@@ -33,35 +19,7 @@ leaderboard_config = {
     "username": "adk",
 }
 
-
-# model parameters
-# design = "design_A.0"
-# model = "model_1.0"
-# robot = "double_pendulum"
-torque_limit = [0.0, 6.0]
-
-# model_par_path = (
-#     "../third_party/double_pendulum/data/system_identification/identified_parameters/"
-#     + design
-#     + "/"
-#     + model
-#     + "/model_parameters.yml"
-# )
-# mpar = model_parameters()
-# mpar.load_yaml(model_par_path)
-# mpar.set_torque_limit(torque_limit)
-
-# simulation parameters
-# dt = 0.001
-# t_final = 70.0
-# integrator = "runge_kutta"
-# x0 = [-np.pi / 6 - 0.0, -np.pi / 2 - 0.0, 0.0, 0.0]
-# goal = [np.pi, 0.0, 0.0, 0.0]
-
-# setup savedir
-# timestamp = datetime.today().strftime("%Y%m%d-%H%M%S")
-# save_dir = os.path.join("data", design, model, robot, "mppi", timestamp)
-# os.makedirs(save_dir)
+torque_limit = mpar.tl
 
 cfg = Config(
     key=jax.random.PRNGKey(0),
