@@ -65,21 +65,20 @@ class TVLQRController(AbstractController):
         (Default value = 40)
         (Default value=100)
     """
+    def __init__(self,
+                 mass=[0.5, 0.6],
+                 length=[0.3, 0.2],
+                 com=[0.3, 0.2],
+                 damping=[0.1, 0.1],
+                 coulomb_fric=[0.0, 0.0],
+                 gravity=9.81,
+                 inertia=[None, None],
+                 torque_limit=[0.0, 1.0],
+                 model_pars=None,
+                 csv_path="",
+                 num_break=40,
+                 ):
 
-    def __init__(
-        self,
-        mass=[0.5, 0.6],
-        length=[0.3, 0.2],
-        com=[0.3, 0.2],
-        damping=[0.1, 0.1],
-        coulomb_fric=[0.0, 0.0],
-        gravity=9.81,
-        inertia=[None, None],
-        torque_limit=[0.0, 1.0],
-        model_pars=None,
-        csv_path="",
-        num_break=40,
-    ):
         super().__init__()
 
         # model parameters
@@ -105,48 +104,50 @@ class TVLQRController(AbstractController):
             self.torque_limit = model_pars.tl
 
         self.splant = SymbolicDoublePendulum(
-            mass=self.mass,
-            length=self.length,
-            com=self.com,
-            damping=self.damping,
-            gravity=self.gravity,
-            coulomb_fric=self.cfric,
-            inertia=self.inertia,
-            torque_limit=self.torque_limit,
-        )
+                mass=self.mass,
+                length=self.length,
+                com=self.com,
+                damping=self.damping,
+                gravity=self.gravity,
+                coulomb_fric=self.cfric,
+                inertia=self.inertia,
+                torque_limit=self.torque_limit)
 
         self.num_break = num_break
 
         # load trajectory
-        self.T, self.X, self.U = load_trajectory(csv_path=csv_path, with_tau=True)
+        self.T, self.X, self.U = load_trajectory(csv_path=csv_path,
+                                                 with_tau=True)
         self.max_t = self.T[-1]
         self.dt = self.T[1] - self.T[0]
 
         # interpolate trajectory
         self.X_interp = InterpolateVector(
-            T=self.T, X=self.X, num_break=num_break, poly_degree=3
-        )
+                T=self.T,
+                X=self.X,
+                num_break=num_break,
+                poly_degree=3)
 
         self.U_interp = InterpolateVector(
-            T=self.T, X=self.U, num_break=num_break, poly_degree=3
-        )
+                T=self.T,
+                X=self.U,
+                num_break=num_break,
+                poly_degree=3)
 
         # default parameters
-        self.Q = np.diag([4.0, 4.0, 0.1, 0.1])
-        self.R = 2 * np.eye(1)
-        self.Qf = np.diag([4.0, 4.0, 0.1, 0.1])
-        self.goal = np.array([np.pi, 0.0, 0.0, 0.0])
+        self.Q = np.diag([4., 4., 0.1, 0.1])
+        self.R = 2*np.eye(1)
+        self.Qf = np.diag([4., 4., 0.1, 0.1])
+        self.goal = np.array([np.pi, 0., 0., 0.])
 
         # initializations
         self.K = []
         # self.k = []
 
-    def set_cost_parameters(
-        self,
-        Q=np.diag([4.0, 4.0, 0.1, 0.1]),
-        R=2 * np.eye(1),
-        Qf=np.diag([4.0, 4.0, 0.1, 0.1]),
-    ):
+    def set_cost_parameters(self,
+                            Q=np.diag([4., 4., 0.1, 0.1]),
+                            R=2*np.eye(1),
+                            Qf=np.diag([4., 4., 0.1, 0.1])):
         """set_cost_parameters
         Set the cost matrices Q, R and Qf.
         (Qf for the final stabilization)
@@ -171,7 +172,7 @@ class TVLQRController(AbstractController):
         self.R = np.asarray(R)
         self.Qf = np.asarray(Qf)
 
-    def set_goal(self, x=[np.pi, 0.0, 0.0, 0.0]):
+    def set_goal(self, x=[np.pi, 0., 0., 0.]):
         """set_goal.
         Set goal for the controller.
 
@@ -184,8 +185,8 @@ class TVLQRController(AbstractController):
             (Default value=[np.pi, 0., 0., 0.])
         """
         y = x.copy()
-        y[0] = y[0] % (2 * np.pi)
-        y[1] = (y[1] + np.pi) % (2 * np.pi) - np.pi
+        y[0] = y[0] % (2*np.pi)
+        y[1] = (y[1] + np.pi) % (2*np.pi) - np.pi
         self.goal = np.asarray(y)
 
     def init_(self):
@@ -194,12 +195,13 @@ class TVLQRController(AbstractController):
         """
 
         self.K, _ = iterative_riccati(
-            self.splant, self.Q, self.R, self.Qf, self.dt, self.X, self.U
-        )
+            self.splant, self.Q, self.R, self.Qf, self.dt, self.X, self.U)
 
         self.K_interp = InterpolateMatrix(
-            T=self.T, X=self.K, num_break=self.num_break, poly_degree=3
-        )
+            T=self.T,
+            X=self.K,
+            num_break=self.num_break,
+            poly_degree=3)
 
     def get_control_output_(self, x, t):
         """
@@ -267,42 +269,37 @@ class TVLQRController(AbstractController):
         """
 
         par_dict = {
-            "mass1": self.mass[0],
-            "mass2": self.mass[1],
-            "length1": self.length[0],
-            "length2": self.length[1],
-            "com1": self.com[0],
-            "com2": self.com[1],
-            "damping1": self.damping[0],
-            "damping2": self.damping[1],
-            "cfric1": self.cfric[0],
-            "cfric2": self.cfric[1],
-            "gravity": self.gravity,
-            "inertia1": self.inertia[0],
-            "inertia2": self.inertia[1],
-            # "Ir" : self.Ir,
-            # "gr" : self.gr,
-            "torque_limit1": self.torque_limit[0],
-            "torque_limit2": self.torque_limit[1],
-            "num_break": self.num_break,
-            "goal1": float(self.goal[0]),
-            "goal2": float(self.goal[1]),
-            "goal3": float(self.goal[2]),
-            "goal4": float(self.goal[3]),
-            "dt": float(self.dt),
-            "max_t": float(self.max_t),
+                "mass1" : self.mass[0],
+                "mass2" : self.mass[1],
+                "length1" : self.length[0],
+                "length2" : self.length[1],
+                "com1" : self.com[0],
+                "com2" : self.com[1],
+                "damping1" : self.damping[0],
+                "damping2" : self.damping[1],
+                "cfric1" : self.cfric[0],
+                "cfric2" : self.cfric[1],
+                "gravity" : self.gravity,
+                "inertia1" : self.inertia[0],
+                "inertia2" : self.inertia[1],
+                #"Ir" : self.Ir,
+                #"gr" : self.gr,
+                "torque_limit1" : self.torque_limit[0],
+                "torque_limit2" : self.torque_limit[1],
+                "num_break" : self.num_break,
+                "goal1" : float(self.goal[0]),
+                "goal2" : float(self.goal[1]),
+                "goal3" : float(self.goal[2]),
+                "goal4" : float(self.goal[3]),
+                "dt" : float(self.dt),
+                "max_t" : float(self.max_t),
         }
 
-        with open(os.path.join(save_dir, "controller_tvlqr_parameters.yml"), "w") as f:
+        with open(os.path.join(save_dir, "controller_tvlqr_parameters.yml"), 'w') as f:
             yaml.dump(par_dict, f)
 
         np.savetxt(os.path.join(save_dir, "controller_tvlqr_Qmatrix.txt"), self.Q)
         np.savetxt(os.path.join(save_dir, "controller_tvlqr_Rmatrix.txt"), self.R)
         np.savetxt(os.path.join(save_dir, "controller_tvlqr_Qfmatrix.txt"), self.Qf)
 
-        save_trajectory(
-            os.path.join(save_dir, "controller_tvlqr_initial_traj.csv"),
-            self.T,
-            self.X,
-            self.U,
-        )
+        save_trajectory(os.path.join(save_dir, "controller_tvlqr_initial_traj.csv"), self.T, self.X, self.U)
